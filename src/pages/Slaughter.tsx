@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Plus, Axe, ArrowRight } from 'lucide-react';
+import { Plus, Axe, ArrowRight, Edit, Trash2 } from 'lucide-react';
+import { EditSlaughterDialog } from '@/components/edit-dialogs/EditSlaughterDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
@@ -158,8 +160,25 @@ export default function Slaughter() {
     
     setDialogOpen(false);
     setFormData({ owner: '', batch_id: '', fridge_id: '', quantity: '' });
-    fetchRecords();
     fetchBatches();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from('slaughter_records').delete().eq('id', id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete record. Please try again.',
+      });
+    } else {
+      toast({
+        title: 'Record Deleted',
+        description: `Slaughter record has been deleted. Stock was NOT restored.`,
+      });
+      fetchRecords();
+    }
   };
 
   const filteredBatches = batches.filter(b => !formData.owner || b.owner === formData.owner);
@@ -282,7 +301,8 @@ export default function Slaughter() {
               <TableHead>Owner</TableHead>
               <TableHead>From Batch</TableHead>
               <TableHead>To Fridge</TableHead>
-              <TableHead>Quantity</TableHead>
+               <TableHead>Quantity</TableHead>
+               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -318,7 +338,36 @@ export default function Slaughter() {
                   </TableCell>
                   <TableCell>{record.batches?.batch_name || '-'}</TableCell>
                   <TableCell>{record.fridges?.name || '-'}</TableCell>
-                  <TableCell className="font-semibold">{record.quantity}</TableCell>
+                   <TableCell className="font-semibold">{record.quantity}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <EditSlaughterDialog record={record} onSuccess={fetchRecords} />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Slaughter Record?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this slaughter record. Stock will NOT be restored automatically. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => handleDelete(record.id)}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             )}

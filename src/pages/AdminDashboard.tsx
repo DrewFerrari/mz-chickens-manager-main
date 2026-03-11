@@ -42,6 +42,11 @@ import { SystemConfigTab } from '@/components/admin/SystemConfigTab';
 import { DataExportTab } from '@/components/admin/DataExportTab';
 import { StockReconciliationTab } from '@/components/admin/StockReconciliationTab';
 import { OwnerComparisonTab } from '@/components/admin/OwnerComparisonTab';
+import { EditBatchDialog } from '@/components/edit-dialogs/EditBatchDialog';
+import { EditFridgeDialog } from '@/components/edit-dialogs/EditFridgeDialog';
+import { EditFowlRunDialog } from '@/components/edit-dialogs/EditFowlRunDialog';
+import { EditSaleDialog } from '@/components/edit-dialogs/EditSaleDialog';
+import { EditExpenseDialog } from '@/components/edit-dialogs/EditExpenseDialog';
 
 export default function AdminDashboard() {
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -286,34 +291,37 @@ export default function AdminDashboard() {
                     </TableCell>
                     <TableCell>{format(new Date(batch.date_introduced), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            {deleting === batch.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Batch?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete "{batch.batch_name}". This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              onClick={() => handleDelete('batches', batch.id, batch.batch_name)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1">
+                        <EditBatchDialog batch={batch} onSuccess={fetchAllData} />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              {deleting === batch.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Batch?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete "{batch.batch_name}". This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDelete('batches', batch.id, batch.batch_name)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -356,34 +364,37 @@ export default function AdminDashboard() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            {deleting === fridge.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Fridge?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete "{fridge.name}". This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              onClick={() => handleDelete('fridges', fridge.id, fridge.name)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1">
+                        <EditFridgeDialog fridge={fridge} onSuccess={fetchAllData} />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              {deleting === fridge.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Fridge?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete "{fridge.name}". This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDelete('fridges', fridge.id, fridge.name)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -424,34 +435,37 @@ export default function AdminDashboard() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            {deleting === run.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Fowl Run?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete "{run.name}". This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              onClick={() => handleDelete('fowl_runs', run.id, run.name)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1">
+                        <EditFowlRunDialog fowlRun={run} onSuccess={fetchAllData} />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              {deleting === run.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Fowl Run?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete "{run.name}". This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDelete('fowl_runs', run.id, run.name)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -490,39 +504,41 @@ export default function AdminDashboard() {
                     <TableCell className="font-semibold text-success">${Number(sale.total_amount).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {PAYMENT_METHOD_LABELS[sale.payment_method]}
                         {sale.ecocash_owner && ` (${sale.ecocash_owner === 'miss_munyanyi' ? 'M' : 'Z'})`}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            {deleting === sale.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Sale?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete this sale record. Stock will NOT be restored. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              onClick={() => handleDelete('sales', sale.id, `Sale #${sale.id.slice(0, 8)}`)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1">
+                        <EditSaleDialog sale={sale} onSuccess={fetchAllData} />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              {deleting === sale.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Sale?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete this sale record. Stock will NOT be restored. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDelete('sales', sale.id, `Sale #${sale.id.slice(0, 8)}`)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -608,34 +624,37 @@ export default function AdminDashboard() {
                     <TableCell className="max-w-[200px] truncate">{expense.description}</TableCell>
                     <TableCell className="font-semibold text-destructive">-${Number(expense.amount).toFixed(2)}</TableCell>
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            {deleting === expense.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete this expense record. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              onClick={() => handleDelete('expenses', expense.id, expense.description)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1">
+                        <EditExpenseDialog expense={expense} onSuccess={fetchAllData} />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              {deleting === expense.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete this expense record. This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={() => handleDelete('expenses', expense.id, expense.description)}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

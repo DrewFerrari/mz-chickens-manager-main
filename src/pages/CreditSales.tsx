@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CreditCard, CheckCircle2, Phone, User, Loader2 } from 'lucide-react';
+import { CreditCard, CheckCircle2, Phone, User, Loader2, Edit, Trash2 } from 'lucide-react';
+import { EditSaleDialog } from '@/components/edit-dialogs/EditSaleDialog';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
@@ -111,6 +112,28 @@ export default function CreditSales() {
     setSettling(null);
   };
 
+  const handleDelete = async (id: string, customer: string) => {
+    if (!confirm(`Are you sure you want to delete this credit sale for "${customer}"?`)) {
+      return;
+    }
+
+    const { error } = await supabase.from('sales').delete().eq('id', id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete sale. Please try again.',
+      });
+    } else {
+      toast({
+        title: 'Sale Deleted',
+        description: `Credit sale record has been deleted.`,
+      });
+      fetchCreditSales();
+    }
+  };
+
   const totalOutstanding = creditSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
 
   return (
@@ -177,7 +200,7 @@ export default function CreditSales() {
               <TableHead>Qty</TableHead>
               <TableHead>Amount</TableHead>
               {showPaid && <TableHead>Paid On</TableHead>}
-              {!showPaid && <TableHead className="w-32">Action</TableHead>}
+              {!showPaid && <TableHead className="w-48">Action</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -233,38 +256,51 @@ export default function CreditSales() {
                     </TableCell>
                   ) : (
                     <TableCell>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button size="sm" className="bg-success hover:bg-success/90">
-                            {settling === sale.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <>
-                                <CheckCircle2 className="w-4 h-4 mr-1" />
-                                Settle
-                              </>
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Settle Debt?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Mark {sale.customer_name || 'this customer'}'s debt of ${Number(sale.total_amount).toFixed(2)} as paid?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-success text-success-foreground hover:bg-success/90"
-                              onClick={() => settleDebt(sale)}
-                            >
-                              <CheckCircle2 className="w-4 h-4 mr-2" />
-                              Confirm Payment
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-1">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" className="bg-success hover:bg-success/90">
+                              {settling === sale.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                                  Settle
+                                </>
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Settle Debt?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Mark {sale.customer_name || 'this customer'}'s debt of ${Number(sale.total_amount).toFixed(2)} as paid?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-success text-success-foreground hover:bg-success/90"
+                                onClick={() => settleDebt(sale)}
+                              >
+                                <CheckCircle2 className="w-4 h-4 mr-2" />
+                                Confirm Payment
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
+                        <EditSaleDialog sale={sale} onSuccess={fetchCreditSales} />
+                        
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDelete(sale.id, sale.customer_name || 'Unknown')}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   )}
                 </TableRow>

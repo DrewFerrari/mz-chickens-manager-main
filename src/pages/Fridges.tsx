@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EditFridgeDialog } from '@/components/edit-dialogs/EditFridgeDialog';
 import {
   Dialog,
   DialogContent,
@@ -128,6 +129,28 @@ export default function Fridges() {
       });
       setDialogOpen(false);
       setFormData({ name: '', owner: '', capacity: '', temperature: '' });
+      fetchFridges();
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    const { error } = await supabase.from('fridges').delete().eq('id', id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete fridge. Please try again.',
+      });
+    } else {
+      toast({
+        title: 'Fridge Deleted',
+        description: `"${name}" has been deleted.`,
+      });
       fetchFridges();
     }
   };
@@ -274,11 +297,19 @@ export default function Fridges() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
+                      <DropdownMenuItem asChild>
+                        <EditFridgeDialog 
+                          fridge={fridge} 
+                          onSuccess={fetchFridges} 
+                          trigger={
+                            <button className="flex w-full items-center px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit
+                            </button>
+                          } 
+                        />
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(fridge.id, fridge.name)}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </DropdownMenuItem>

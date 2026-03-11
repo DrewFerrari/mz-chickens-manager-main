@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Plus, Skull, AlertTriangle } from 'lucide-react';
+import { Plus, Skull, AlertTriangle, Edit, Trash2 } from 'lucide-react';
+import { EditDeathDialog } from '@/components/edit-dialogs/EditDeathDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
@@ -138,8 +140,25 @@ export default function Deaths() {
     
     setDialogOpen(false);
     setFormData({ owner: '', batch_id: '', quantity: '', reason: '' });
-    fetchDeaths();
     fetchBatches();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from('natural_deaths').delete().eq('id', id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete record. Please try again.',
+      });
+    } else {
+      toast({
+        title: 'Record Deleted',
+        description: `Death record has been deleted. Stock was NOT restored.`,
+      });
+      fetchDeaths();
+    }
   };
 
   const filteredBatches = batches.filter(b => !formData.owner || b.owner === formData.owner);
@@ -252,7 +271,8 @@ export default function Deaths() {
               <TableHead>Owner</TableHead>
               <TableHead>Batch</TableHead>
               <TableHead>Quantity</TableHead>
-              <TableHead>Reason</TableHead>
+               <TableHead>Reason</TableHead>
+               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -292,8 +312,37 @@ export default function Deaths() {
                   <TableCell className="font-semibold text-destructive">
                     {death.quantity}
                   </TableCell>
-                  <TableCell className="text-muted-foreground max-w-xs truncate">
+                   <TableCell className="text-muted-foreground max-w-xs truncate">
                     {death.reason || '-'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <EditDeathDialog death={death} onSuccess={fetchDeaths} />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Death Record?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this death record. Stock will NOT be restored automatically. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => handleDelete(death.id)}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

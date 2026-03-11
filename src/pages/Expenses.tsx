@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus, DollarSign, Trash2 } from 'lucide-react';
+import { Plus, DollarSign, Trash2, Edit } from 'lucide-react';
+import { EditExpenseDialog } from '@/components/edit-dialogs/EditExpenseDialog';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
@@ -296,15 +297,18 @@ export default function Expenses() {
                   <TableCell className="font-semibold text-destructive">
                     -${Number(expense.amount).toFixed(2)}
                   </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDelete(expense.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                   <TableCell>
+                    <div className="flex items-center gap-1">
+                      <EditExpenseDialog expense={expense} onSuccess={fetchExpenses} />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDelete(expense.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

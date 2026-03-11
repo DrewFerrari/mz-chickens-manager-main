@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EditBatchDialog } from '@/components/edit-dialogs/EditBatchDialog';
 import {
   Dialog,
   DialogContent,
@@ -123,6 +124,28 @@ export default function Batches() {
         starting_quantity: '',
         cost_per_chick: '',
         notes: '',
+      });
+      fetchBatches();
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    const { error } = await supabase.from('batches').delete().eq('id', id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete batch. Please try again.',
+      });
+    } else {
+      toast({
+        title: 'Batch Deleted',
+        description: `"${name}" has been deleted.`,
       });
       fetchBatches();
     }
@@ -301,11 +324,19 @@ export default function Batches() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                    <DropdownMenuItem asChild>
+                      <EditBatchDialog 
+                        batch={batch} 
+                        onSuccess={fetchBatches} 
+                        trigger={
+                          <button className="flex w-full items-center px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                          </button>
+                        } 
+                      />
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(batch.id, batch.batch_name)}>
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
                     </DropdownMenuItem>

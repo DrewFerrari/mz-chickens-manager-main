@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Plus, Package } from 'lucide-react';
+import { Plus, Package, Edit, Trash2 } from 'lucide-react';
+import { EditFeedDialog } from '@/components/edit-dialogs/EditFeedDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
@@ -108,6 +110,24 @@ export default function Feed() {
       });
       setDialogOpen(false);
       setFormData({ owner: '', feed_type: '', bags: '', cost_per_bag: '', supplier: '' });
+      fetchPurchases();
+    }
+  };
+
+  const handleDelete = async (id: string, feedType: string) => {
+    const { error } = await supabase.from('feed_purchases').delete().eq('id', id);
+
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete purchase. Please try again.',
+      });
+    } else {
+      toast({
+        title: 'Purchase Deleted',
+        description: `Purchase of ${feedType} has been deleted.`,
+      });
       fetchPurchases();
     }
   };
@@ -230,6 +250,7 @@ export default function Feed() {
               <TableHead>Cost/Bag</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Supplier</TableHead>
+              <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -268,6 +289,35 @@ export default function Feed() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {purchase.supplier || '-'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <EditFeedDialog purchase={purchase} onSuccess={fetchPurchases} />
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Feed Purchase?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this feed purchase record. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => handleDelete(purchase.id, purchase.feed_type)}
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
