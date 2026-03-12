@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-type ExportType = 'sales' | 'expenses' | 'batches' | 'feed_purchases' | 'natural_deaths' | 'full_backup';
+type ExportType = 'sales' | 'expenses' | 'batches' | 'feed_purchases' | 'natural_deaths' | 'slaughter_records' | 'fridge_stock' | 'cash_records' | 'stock_adjustments' | 'full_backup';
 
 export function DataExportTab() {
   const [exporting, setExporting] = useState<ExportType | null>(null);
@@ -63,7 +63,7 @@ export function DataExportTab() {
     try {
       if (type === 'full_backup') {
         // Export all tables
-        const tables = ['sales', 'expenses', 'batches', 'feed_purchases', 'natural_deaths', 'fridge_stock', 'slaughter_records'];
+        const tables = ['sales', 'expenses', 'batches', 'feed_purchases', 'natural_deaths', 'fridge_stock', 'slaughter_records', 'cash_records', 'stock_adjustments'];
         for (const table of tables) {
           const { data } = await supabase.from(table as 'sales').select('*');
           if (data && data.length > 0) {
@@ -75,7 +75,14 @@ export function DataExportTab() {
           description: 'All tables have been exported.',
         });
       } else {
-        const { data, error } = await supabase.from(type).select('*').order('created_at', { ascending: false });
+        let orderColumn = 'created_at';
+        if (type === 'sales') orderColumn = 'sold_at';
+        if (type === 'feed_purchases') orderColumn = 'purchased_at';
+        if (type === 'natural_deaths' || type === 'cash_records' || type === 'stock_adjustments') orderColumn = 'recorded_at';
+        if (type === 'slaughter_records') orderColumn = 'slaughtered_at';
+        if (type === 'fridge_stock') orderColumn = 'updated_at';
+
+        const { data, error } = await supabase.from(type).select('*').order(orderColumn, { ascending: false });
         if (error) throw error;
         exportToCSV((data || []) as Record<string, unknown>[], type);
       }
@@ -96,6 +103,10 @@ export function DataExportTab() {
     { type: 'batches' as ExportType, title: 'Batches Report', description: 'All batch information', icon: FileSpreadsheet },
     { type: 'feed_purchases' as ExportType, title: 'Feed Purchases', description: 'All feed purchase records', icon: FileSpreadsheet },
     { type: 'natural_deaths' as ExportType, title: 'Mortality Report', description: 'All death records', icon: FileSpreadsheet },
+    { type: 'slaughter_records' as ExportType, title: 'Slaughter Records', description: 'All slaughter records', icon: FileSpreadsheet },
+    { type: 'fridge_stock' as ExportType, title: 'Fridge Stock Report', description: 'Current fridge stock', icon: FileSpreadsheet },
+    { type: 'cash_records' as ExportType, title: 'Cash Records', description: 'All cash transactions', icon: FileSpreadsheet },
+    { type: 'stock_adjustments' as ExportType, title: 'Stock Adjustments', description: 'Stock adjustment logs', icon: FileSpreadsheet },
   ];
 
   return (
