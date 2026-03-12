@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Plus, Bird, Calendar, Hash, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { Plus, Bird, Calendar, Hash, MoreHorizontal, Edit, Trash2, ArrowLeftRight } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { PageHeader } from '@/components/ui/page-header';
 import { OwnerBadge } from '@/components/ui/owner-badge';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EditBatchDialog } from '@/components/edit-dialogs/EditBatchDialog';
+import { TransferBatchDialog } from '@/components/edit-dialogs/TransferBatchDialog';
 import {
   Dialog,
   DialogContent,
@@ -324,6 +325,18 @@ export default function Batches() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <TransferBatchDialog
+                        batch={batch}
+                        onSuccess={fetchBatches}
+                        trigger={
+                          <button className="flex w-full items-center px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground">
+                            <ArrowLeftRight className="w-4 h-4 mr-2" />
+                            Transfer
+                          </button>
+                        }
+                      />
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <EditBatchDialog 
                         batch={batch} 
